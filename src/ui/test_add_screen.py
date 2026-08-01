@@ -29,7 +29,7 @@ class TestAddScreen(AppFrame):
         self.comp_dropdown.grid(row=2, column=3, columnspan=3)
         self.comp_dropdown.current(0)
 
-        self.textarea_key_label = tk.Label(self, text="Test Key (jira):")
+        self.textarea_key_label = tk.Label(self, text="Test Key:")
         self.textarea_key_label.grid(row=3, column=0, columnspan=2, sticky=tk.W)
         
 
@@ -38,7 +38,7 @@ class TestAddScreen(AppFrame):
         self.textarea_key.delete(1.0, tk.END)
         self.textarea_key.insert(tk.END, self.context['key'])
 
-        self.textarea_sum_label = tk.Label(self, text="Test Summary (jira):")
+        self.textarea_sum_label = tk.Label(self, text="Test Title:")
         self.textarea_sum_label.grid(row=4, column=0, columnspan=2, sticky=tk.W)
 
         self.textarea_sum = tk.Text(self, width=40, height=1)
@@ -106,6 +106,6 @@ class TestAddScreen(AppFrame):
                 for step in self.context['steps']:
                     steps += step[0]+'\n'+step[1]+'\n'+step[2]+'\n'
 
-                self.app.model.insert_new_test(key, steps, summary, str(selected_team.id), str(selected_component.id))
+                self.app.model.insert_new_test(key, steps, summary, selected_team, selected_component)
 
                 self.app.ui.draw_frame(self.app.ui.screen.Main)

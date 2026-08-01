@@ -51,7 +51,7 @@ class UpdateDataScreen(AppFrame):
         self.textarea_server = tk.Text(self, width=40, height=1)
         self.textarea_server.grid(row=3, column=3,columnspan=3)
         self.textarea_server.delete(1.0, tk.END)
-        self.textarea_server.insert(tk.END, "https://jira.si.siemens.cloud/")
+        self.textarea_server.insert(tk.END, "jira link")
 
         self.textarea_apikey_Label = tk.Label(self, text="API Jira Key:")
         self.textarea_apikey_Label.grid(row=4, column=0, sticky=tk.W)

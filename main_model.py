@@ -705,79 +705,18 @@ def loadDataFromJira(apikey, server, model, projects):
 
 def main():
 
-    #informar sua apikey do Jira e confirmar o servidor.
+    print("Create Model")
+    model = Model()
 
-    siemens = False
+    print("Traning model")
+    epocs = 10
+    model.make_model(epocs)
 
-    if siemens:
+    print("Saving model")
+    file = open('./data/model', 'wb')
+    pickle.dump(model,file)
+    print("Model save")
 
-        apikey = "MDUwMTA2NjIxODcxOqSZBHdJvUqSJbIlmubp1L7SvtA0"
-        server = "https://jira.si.siemens.cloud/"
-
-        projects = ['SP7 A-Team', 'SP7 ALSPICE ', 'SP7 Architects', 'SP7 Area 51', 'SP7 BigBang', 'SP7 Cerberus', 
-                    'SP7 Coyotes', 'SP7 Desperados', 'SP7 DNA', 'SP7 Erlkoenig', 'SP7 ETA', 'SP7 Evergreens', 'SP7 Improvements', 
-                    'SP7 ModelMonks', 'SP7 Outage Management', 'SP7 Portfolio',  'SP7 Program (ART)', 'SP7 Roadrunners', 'SP7 Rockies', 
-                    'SP7 tardHIS', 'SP7 TestTekkies', 'SP7 Update Mavericks', 'Spectrum Power 7', 'WebSDK']
-
-        print("Create Model")
-        model = Model()
-
-        print("Load Data From Jira")
-        loadDataFromJira(apikey, server, model, projects)
-
-        print("Traning model")
-        model.make_model(10)
-        print("Saving model")
-
-        file = open('./data/model', 'wb')
-        pickle.dump(model,file)
-
-        print("Model save")
-
-    else:
-
-        test = False
-        if test:       
-            #open("C:\\Users\\Bruno\\Documents\\GitHub\\moretes\\results.txt",'w').close()
-            epocs = [10, 20, 40, 80, 100]
-            for epc in epocs:
-                print(">>>>>>>>>>>>>>>>>>Model")
-                model = Model()
-                model.assessment_model(epc, 10)
-                
-                print(">>>>>>>>>>>>>>>>>>Model AVG")
-                modelavg = ModelAvg()
-                modelavg.assessment_model(epc, 10)
-
-                print(">>>>>>>>>>>>>>>>>>Model Rand")
-                modelavg = ModelRand()
-                modelavg.assessment_model(epc, 10)
-
-        else:
-            print("Create Model")
-            model = Model()
-            #print("Load Data From Jira")
-            
-            #loadDataFromJira(apikey, server)
-
-            print("Traning model")
-            model.make_model(10)
-            print("Saving model")
-
-            file = open('./data/model', 'wb')
-            pickle.dump(model,file)
-
-            print("Model save")
-
-        
-        # bug = model.list_Bug[model.get_id_bug_from_key("SP7-108822")]
-        # print(model.recommend(bug))
-
-        
-        # Train and Test Model, and Save Model
-        # Load Model , Update Mode, and Recommender Tests
-        
-
-
+   
 if __name__=="__main__":
     main()

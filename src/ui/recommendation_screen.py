@@ -12,7 +12,7 @@ class RecommendationScreen(AppFrame):
 
         self.list_box = tk.Listbox(self, width=80, height=21, selectmode="multiple")
         for item in range(len(self.context)-1):
-            self.list_box.insert(item, f"{self.context[item+1].key} - {self.context[item+1].summary}")
+            self.list_box.insert(item, f"{self.context[item+1].id} - {self.context[item+1].title}")
         self.list_box.grid(row=1, column=0, columnspan=5, pady=10)
 
         

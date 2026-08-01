@@ -12,8 +12,8 @@ class Model:
     def __init__(self):
         self.name = "Model"
 
-        self.list_Bug = []
-        self.list_Test =[]
+        self.list_Bug = {}
+        self.list_Test ={}
 
         self.interactions =[]
         self.precision = 0.0
@@ -21,29 +21,30 @@ class Model:
         self.encode = SentenceTransformer('sentence-transformers/distiluse-base-multilingual-cased-v1')
         self.encode.max_seq_length = 512
 
-        self.dic_Test = {}
-        self.dic_Bug  = {}
+       
+        self.teams = []
+        self.comps = []
+
 
     
     def load_data_from_file(self):
-        self.list_Bug = Data.load_data_from_csv("./data/SBert_Bug.csv", Bug)
-        self.list_Test = Data.load_data_from_csv("./data/SBert_Test.csv", Test)
+        self.list_Bug = Data.load_data_from_csv("./data/bugs.csv", Bug, self.encode)
+        self.list_Test = Data.load_data_from_csv("./data/tests.csv", Test, self.encode)
 
-        self.comps = Data.load_comps_teams("./data/Comp_Index.csv")
-        self.teams = Data.load_comps_teams("./data/Team_Index.csv")
+        for bug in self.list_Bug.values():
+            if bug.team not in self.teams:
+                self.teams.append(bug.team)
+            if bug.comp not in self.comps:
+                self.comps.append(bug.comp)
 
-        summarysBug = Data.load_summary_file("./data/SummaryBugs.csv")
-        summarysTest = Data.load_summary_file("./data/SummaryTests.csv")
+        for test in self.list_Test.values():
+            if test.team not in self.teams:
+                self.teams.append(test.team)
+            if test.comp not in self.comps:
+                self.comps.append(test.comp)
 
-        print(f"Bugs: {len(self.list_Bug)} - {len(summarysBug)}")
+        print(f"Bugs: {len(self.list_Bug)} Tests: {len(self.list_Test)}")
 
-        for bug in range(len(self.list_Bug)):
-            #print(f"{summarysBug[self.list_Bug[bug].key]}")
-            self.list_Bug[bug].summary = summarysBug[self.list_Bug[bug].key]
-            self.dic_Bug[self.list_Bug[bug].key] = self.list_Bug[bug].id
-        for test in range(len(self.list_Test)):
-            self.list_Test[test].summary = summarysTest[self.list_Test[test].key]
-            self.dic_Test[self.list_Test[test].key] = self.list_Test[test].id
     
     def get_id_bug_from_key(self, key):
         try:
@@ -69,7 +70,7 @@ class Model:
         # return -1
 
     def load_input(self, valid = False):
-        data = Data.load_input_from_csv("./data/Interacoes.csv")
+        data = Data.load_relations_from_csv("./data/relation.csv")
         if valid:
             return Data.split_data(data,[20,30,50],valid)
         else:
@@ -83,19 +84,15 @@ class Model:
                 bar()
                 test = link["test_id"]
                 bug = link["bug_id"]
-                if test >= len(self.list_Test) or bug >= len(self.list_Bug):
-                    return
-                if link["rating"] == 1:
-                    if link["test_id"] not in self.list_Bug[bug].tests_positive:
-                        self.list_Bug[bug].tests_positive.append(link["test_id"])
-                    if link["bug_id"] not in self.list_Test[test].bugs_positive:
-                        self.list_Test[test].bugs_positive.append(link["bug_id"])
-                else:
-                    if link["test_id"] not in self.list_Bug[bug].tests_negative:
-                        self.list_Bug[bug].tests_negative.append(link["test_id"])
+                
+                if test not in self.list_Bug[bug].tests_positive:
+                    self.list_Bug[bug].tests_positive.append(test)
+                if bug not in self.list_Test[test].bugs_positive:
+                    self.list_Test[test].bugs_positive.append(bug)
+                
                 
         with alive_bar(len(self.list_Test)) as bar:
-            for tes in range(len(self.list_Test)):
+            for tes in self.list_Test.keys():
                 bar()
                 for b in self.list_Test[tes].bugs_positive:
                     for t2 in self.list_Bug[b].tests_positive:
@@ -108,7 +105,7 @@ class Model:
 
     def get_negatives(self, tam, bug):
         negatives = []
-        list_aux = self.list_Test[:]
+        list_aux = list(self.list_Test.values())
         shuffle(list_aux)
         for test in list_aux:
             for tc in test.comp:
@@ -372,20 +369,20 @@ class Model:
     def get_candidates(self, bug):
         noInteract = []
         noInteractSameTC = []
-        for tests in self.list_Test:
+        for tests in self.list_Test.values():
             if tests.id not in bug.tests_positive and tests.id not in bug.tests_negative:
                 noInteract.append(tests.id)
-                for comp in tests.comp:
-                    if comp in bug.comp and tests.id not in noInteractSameTC:
-                        noInteractSameTC.append(tests.id)
-                        if tests.id in noInteract:
-                            noInteract.remove(tests.id)
-                for team in tests.team:
-                    if team in bug.team and tests.id not in noInteractSameTC:
-                        noInteractSameTC.append(tests.id)
-                        if tests.id in noInteract:
-                            noInteract.remove(tests.id)
-        
+                
+                if tests.comp == bug.comp and tests.id not in noInteractSameTC:
+                    noInteractSameTC.append(tests.id)
+                    if tests.id in noInteract:
+                        noInteract.remove(tests.id)
+                
+                if tests.team == bug.team and tests.id not in noInteractSameTC:
+                    noInteractSameTC.append(tests.id)
+                    if tests.id in noInteract:
+                        noInteract.remove(tests.id)
+    
         linked_tests =[]
         for tests in bug.tests_positive:
             for link in self.list_Test[tests].tests_similar:
@@ -417,20 +414,20 @@ class Model:
 
 
         return positives + linked_tests, negatives[:2]+noInteractSameTC, noInteract
-        
+
+
+    
     def insert_new_bug(self, key, description, summary, teams, comp):
         encode_text = self.encode.encode(description, convert_to_tensor=True).tolist()
-        bug = Bug(len(self.list_Bug),key,teams.split("#"),comp.split("#"),encode_text)
-        bug.summary = summary
-        self.dic_Bug[key] = bug.id
-        self.list_Bug.append(bug)
+        bug = Bug(id=key, team=teams, title=summary, comp=comp, embedding=encode_text)
+        self.list_Bug[key] = bug
+        
     
     def insert_new_test(self, key, steps, summary, teams, comp):
         encode_text = self.encode.encode(steps, convert_to_tensor=True).tolist()
-        test = Test(len(self.list_Test),key,teams.split("#"),comp.split("#"),encode_text)
-        test.summary = summary
-        self.dic_Test[key] = test.id
-        self.list_Test.append(test)
+        test = Test(id=key, team=teams, title=summary, comp=comp, embedding=encode_text)
+        self.list_Test[key] = test
+        
 
     def update_bug_recomendation(self, bugKey, listTestes):
         try:

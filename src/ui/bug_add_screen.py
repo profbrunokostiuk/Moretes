@@ -29,7 +29,7 @@ class BugAddScreen(AppFrame):
         self.comp_dropdown.grid(row=2, column=3, columnspan=3)
         self.comp_dropdown.current(0)
 
-        self.textarea_key_label = tk.Label(self, text="Bug Key (jira):")
+        self.textarea_key_label = tk.Label(self, text="Bug Key:")
         self.textarea_key_label.grid(row=3, column=0, columnspan=2, sticky=tk.W)
         
         self.textarea_key = tk.Text(self, width=40, height=1)
@@ -38,7 +38,7 @@ class BugAddScreen(AppFrame):
         self.textarea_key.insert(tk.END, self.context['key'])
 
 
-        self.textarea_sum_label = tk.Label(self, text="Bug Summary (jira):")
+        self.textarea_sum_label = tk.Label(self, text="Bug Title:")
         self.textarea_sum_label.grid(row=4, column=0, columnspan=2, sticky=tk.W)
         
 
@@ -80,6 +80,6 @@ class BugAddScreen(AppFrame):
             self.app.model.comps.insert(0,selected_component)
         
 
-            self.app.model.insert_new_bug(key, desc, summary, str(selected_team.id), str(selected_component.id))
+            self.app.model.insert_new_bug(key, desc, summary, selected_team, selected_component)
 
             self.app.ui.draw_frame(self.app.ui.screen.Main)

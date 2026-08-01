@@ -24,13 +24,13 @@ class MainScreen(AppFrame):
         self.comp_dropdown.grid(row=1, column=3, columnspan=3)
         self.comp_dropdown.current(0)
 
-        self.textarea_key_label = tk.Label(self, text="Bug Key (jira):")
+        self.textarea_key_label = tk.Label(self, text="Bug Key:")
         self.textarea_key_label.grid(row=2, column=0, columnspan=2, sticky=tk.W)
 
         self.textarea_key = tk.Text(self, width=40, height=1)
         self.textarea_key.grid(row=2, column=3,columnspan=3)
 
-        self.textarea_sum_label = tk.Label(self, text="Bug Summary (jira):")
+        self.textarea_sum_label = tk.Label(self, text="Bug Title:")
         self.textarea_sum_label.grid(row=3, column=0, columnspan=2, sticky=tk.W)
 
         self.textarea_sum = tk.Text(self, width=40, height=1)
@@ -54,7 +54,7 @@ class MainScreen(AppFrame):
         self.save_button = tk.Button(self, text="Manually add a bug to the model", command=self.add_bug_to_model)
         self.save_button.grid(row=9, column=0, columnspan=5, pady=10, sticky="EW")
 
-        self.save_button = tk.Button(self, text="Update model from Jira", command=self.update_model_from_Jira)
+        self.save_button = tk.Button(self, text="Update model from CSV", command=self.update_model_from_csv)
         self.save_button.grid(row=10, column=0, columnspan=5, pady=10, sticky="EW")
 
 
@@ -64,15 +64,15 @@ class MainScreen(AppFrame):
     def add_bug_to_model(self):
          self.app.ui.draw_frame(self.app.ui.screen.AddBug,{'key':'','summary':'','desc':''})
 
-    def update_model_from_Jira(self):
+    def update_model_from_csv(self):
          self.app.ui.draw_frame(self.app.ui.screen.Update)
 
 
     def save_model_confirm(self):
         ans = messagebox.askquestion("Confirm Change","Are you sure you want to replace the model file??")
         if ans == "yes":
-            self.app.model.teams = sorted(self.app.model.teams, key=lambda d: d.name) #reseta lista de times
-            self.app.model.comps = sorted(self.app.model.comps, key=lambda d: d.name) #reseta lista de componentes
+            self.app.model.teams = sorted(self.app.model.teams) #reseta lista de times
+            self.app.model.comps = sorted(self.app.model.comps) #reseta lista de componentes
             self.app.save_model()
         self.app.ui.draw_frame(self.app.ui.screen.Main)
 
@@ -127,10 +127,9 @@ class MainScreen(AppFrame):
                         self.app.ui.draw_frame(self.app.ui.screen.Main)
                         return
         else:#Se informou um key:
-            id_bug = self.app.model.get_id_bug_from_key(key)
-            if id_bug >= 0:
-                bug = self.app.model.list_Bug[id_bug]
-            else:
+            try:
+                bug = self.app.model.list_Bug[key]
+            except:
                 if len(info) <= 1:# Se não informou descript
                     if summary == "": #nem summary
                         messagebox.showwarning("Bug not found", f"Please provide a description and summary to insert the new bug")
