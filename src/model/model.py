@@ -12,6 +12,9 @@ class Model:
     def __init__(self):
         self.name = "Model"
 
+        self.learning_rate = 0.0
+        self.regularization = 0.0
+
         self.list_Bug = {}
         self.list_Test ={}
 
@@ -96,8 +99,9 @@ class Model:
     def pre_train_model(self, data, n_negatives, epocs):
         print("Start Training")
 
-        optimizer = 0.001
-        l2 = 0.01
+        optimizer = self.learning_rate
+        l2 = self.regularization
+
         test_list =[]
         bug_list = []
         for epc in range(epocs):
@@ -142,7 +146,10 @@ class Model:
         print(f"Bugs used: {len(bug_list)} of {len(self.list_Bug)}")
     
     
-    def make_model(self, epocs): 
+    def make_model(self, epocs, learning_rate=0.001, regularization=0.01): 
+        self.learning_rate = learning_rate
+        self.regularization = regularization
+
         print("load data...")    
         self.load_data_from_file()
         print("load inputs")
@@ -268,8 +275,8 @@ class Model:
 
 
     def update_model(self, bug, positives, negatives):
-        optimizer = 0.001
-        l2 = 0.01
+        optimizer = self.learning_rate
+        l2 = self.regularization
         for neg in negatives:
             if neg not in self.list_Bug[bug].tests_negative:
                 self.list_Bug[bug].tests_negative.append(neg)
