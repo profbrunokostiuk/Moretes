@@ -3,4 +3,3 @@ sentence_transformers
 scikit-learn
 alive_progress
 pyinstaller
-jira

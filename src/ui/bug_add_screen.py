@@ -59,6 +59,9 @@ class BugAddScreen(AppFrame):
         self.back_button = tk.Button(self, text="Save", command=self.goto_main)
         self.back_button.grid(row=9, column=0, columnspan=5, pady=10, sticky="EW")
 
+        self.back_button = tk.Button(self, text="Cancel", command=self.goto_main_cancel)
+        self.back_button.grid(row=10, column=0, columnspan=5, pady=10, sticky="EW")
+
     
     def goto_main(self):
         summary = self.textarea_sum.get(1.0, tk.END).replace("\n","").strip()
@@ -83,3 +86,6 @@ class BugAddScreen(AppFrame):
             self.app.model.insert_new_bug(key, desc, summary, selected_team, selected_component)
 
             self.app.ui.draw_frame(self.app.ui.screen.Main)
+
+    def goto_main_cancel(self):
+        self.app.ui.draw_frame(self.app.ui.screen.Main)

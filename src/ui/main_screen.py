@@ -54,8 +54,6 @@ class MainScreen(AppFrame):
         self.save_button = tk.Button(self, text="Manually add a bug to the model", command=self.add_bug_to_model)
         self.save_button.grid(row=9, column=0, columnspan=5, pady=10, sticky="EW")
 
-        self.save_button = tk.Button(self, text="Update model from CSV", command=self.update_model_from_csv)
-        self.save_button.grid(row=10, column=0, columnspan=5, pady=10, sticky="EW")
 
 
     def add_test_to_model(self):
@@ -63,10 +61,6 @@ class MainScreen(AppFrame):
 
     def add_bug_to_model(self):
          self.app.ui.draw_frame(self.app.ui.screen.AddBug,{'key':'','summary':'','desc':''})
-
-    def update_model_from_csv(self):
-         self.app.ui.draw_frame(self.app.ui.screen.Update)
-
 
     def save_model_confirm(self):
         ans = messagebox.askquestion("Confirm Change","Are you sure you want to replace the model file??")

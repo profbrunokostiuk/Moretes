@@ -64,6 +64,9 @@ class TestAddScreen(AppFrame):
         self.back_button = tk.Button(self, text="Save", command=self.goto_main)
         self.back_button.grid(row=9, column=0, columnspan=5, pady=10, sticky="EW")
 
+        self.back_button = tk.Button(self, text="Cancel", command=self.goto_main_cancel)
+        self.back_button.grid(row=10, column=0, columnspan=5, pady=10, sticky="EW")
+
     def add_step(self):
         selected_team = self.app.model.teams[self.team_dropdown.current()]
         self.app.model.teams.remove(selected_team)
@@ -109,3 +112,6 @@ class TestAddScreen(AppFrame):
                 self.app.model.insert_new_test(key, steps, summary, selected_team, selected_component)
 
                 self.app.ui.draw_frame(self.app.ui.screen.Main)
+
+    def goto_main_cancel(self):
+        self.app.ui.draw_frame(self.app.ui.screen.Main)

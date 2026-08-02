@@ -18,7 +18,10 @@ class RecommendationScreen(AppFrame):
         
 
         self.back_button = tk.Button(self, text="Save", command=self.goto_main)
-        self.back_button.grid(row=3+len(self.context), column=2, pady=10, sticky="EW")
+        self.back_button.grid(row=3+len(self.context), column=0, columnspan=5, pady=10, sticky="EW")
+
+        self.back_button = tk.Button(self, text="Cancel", command=self.goto_main_cancel)
+        self.back_button.grid(row=4+len(self.context), column=0, columnspan=5, pady=10, sticky="EW")
 
    
         
@@ -37,4 +40,7 @@ class RecommendationScreen(AppFrame):
 
         self.app.model.register_interactions(bugId=self.context[0].id, positives=positives, negatives=negatives)
         self.app.model.update_model(self.context[0].id, positives, negatives)
+        self.app.ui.draw_frame(self.app.ui.screen.Main)
+
+    def goto_main_cancel(self):
         self.app.ui.draw_frame(self.app.ui.screen.Main)
