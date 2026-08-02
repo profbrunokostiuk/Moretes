@@ -21,10 +21,8 @@ class Model:
         self.encode = SentenceTransformer('sentence-transformers/distiluse-base-multilingual-cased-v1')
         self.encode.max_seq_length = 512
 
-       
         self.teams = []
         self.comps = []
-
 
     
     def load_data_from_file(self):
@@ -46,29 +44,6 @@ class Model:
         print(f"Bugs: {len(self.list_Bug)} Tests: {len(self.list_Test)}")
 
     
-    def get_id_bug_from_key(self, key):
-        try:
-            return self.dic_Bug[key]
-        except:
-            return -1
-
-        # for i in range(len(self.list_Bug)):
-        #     if self.list_Bug[i].key.upper() == key.upper():
-        #         return self.list_Bug[i].id
-        # return -1
-    
-    def get_id_test_from_key(self, key):
-        try:
-            return self.dic_Test[key]
-        except:
-            return -1
-        
-        
-        # for i in range(len(self.list_Test)):
-        #     if self.list_Test[i].key.upper() == key.upper():
-        #         return self.list_Test[i].id
-        # return -1
-
     def load_input(self, valid = False):
         data = Data.load_relations_from_csv("./data/relation.csv")
         if valid:
@@ -78,7 +53,6 @@ class Model:
     
 
     def info_colect(self, data):
-        #{"test_id": int(float(row[0])), "bug_id": int(float(row[1])), "rating":int(float(row[2])), "time_stamp":int(float(row[3]))}
         with alive_bar(len(data)) as bar:
             for link in data:
                 bar()
@@ -108,14 +82,12 @@ class Model:
         list_aux = list(self.list_Test.values())
         shuffle(list_aux)
         for test in list_aux:
-            for tc in test.comp:
-                if tc not in bug.comp:
-                    for tt in test.team:
-                        if tt not in bug.team:
-                            if test.id not in negatives:
-                                negatives.append(test.id)
-                            if len(negatives)>=tam:
-                                return negatives
+            if test.comp != bug.comp:
+                if test.team != bug.team:
+                    if test.id not in negatives:
+                        negatives.append(test.id)
+                    if len(negatives)>=tam:
+                        return negatives
                     
 
     def sigmoid(self, x):
@@ -235,34 +207,23 @@ class Model:
         
     
     def recommend(self, bug, num_elements):
-        #positives+linked_tests, negatives[:2]+noInteractSameTC, noInteract
+
         positivesLinked, negativesSameTC, noInteract = self.get_candidates(bug = bug)
-
-
         for n in negativesSameTC:
             if n in positivesLinked:
                 negativesSameTC.remove(n)
         for no in noInteract:
             if no in positivesLinked or no in negativesSameTC:
                 noInteract.remove(no)
-
         retorno = positivesLinked[:num_elements[0]]+negativesSameTC[:num_elements[1]]+noInteract[:]
-        
         return retorno[:num_elements[0]+num_elements[1]+num_elements[2]]
-        # scores = self.score(bug.data, candidates = positivesLinked + negativesSameTC + noInteract)
 
-        # positivesLinkedScores = scores[:len(positivesLinked)]
-        # negativesSameTCScores = scores[len(positivesLinked):len(positivesLinked)+len(negativesSameTC)]
-        # noInteractScores      = scores[len(positivesLinked)+len(negativesSameTC):]
-
-        # return self.get_rank_N_Tests(candidates= [positivesLinked, negativesSameTC, noInteract],scores=[positivesLinkedScores,negativesSameTCScores,noInteractScores], num_elements=num_elements)
-    
-
+       
     def SBertSimilarity(self, text):
         encode_text = self.encode.encode(text, convert_to_tensor=True).tolist()
 
         embeddings =  []
-        for bug in self.list_Bug:
+        for bug in self.list_Bug.values():
             embeddings.append(bug.embedding)
         cos_sin = cosine_similarity([encode_text],embeddings)
         if (max(cos_sin[0]) > 0.95):
@@ -272,27 +233,26 @@ class Model:
         else:
             return -1, encode_text, max(cos_sin[0])
     
-    def insert_Bug(self, encode_text, id, comp, team, key, opt):
+    def insert_Bug(self, encode_text, id, comp, team, key, opt, title):
         if opt > 0.50:
             #def __init__(self, id, key, team, comp, embedding):
-            bug = Bug(len(self.list_Bug),key,[team],[comp],encode_text)
+            bug = Bug(id=key, title=title, team=team, comp=comp, embedding=encode_text)
             bug.data = self.list_Bug[id].data
             bug.tests_positive = self.list_Bug[id].tests_positive
             bug.tests_negative = self.list_Bug[id].tests_negative
-            self.dic_Bug[key] = len(self.list_Bug)
-            self.list_Bug.append(bug)
+            self.list_Bug[key] = bug
             
         else:
-            bug = Bug(len(self.list_Bug),key,[team],[comp],encode_text)
-            
+            bug = Bug(id=key, title=title, team=team, comp=comp, embedding=encode_text)
+
             list_bugs_emb = []
-            for b in self.list_Bug:
-                if comp in b.comp and team in b.team:
+            for b in self.list_Bug.values():
+                if comp == b.comp and team == b.team:
                     list_bugs_emb.append(b.data)
 
             if len(list_bugs_emb) == 0:
-                for b in self.list_Bug:
-                    if comp in b.comp:
+                for b in self.list_Bug.values():
+                    if comp == b.comp:
                         list_bugs_emb.append(b.data)
 
             if len(list_bugs_emb) > 0:
@@ -303,9 +263,8 @@ class Model:
                         val+=list_bugs_emb[j][i]
                     soma.append(val/len(list_bugs_emb))
                 bug.data = soma 
-            self.dic_Bug[key] = len(self.list_Bug)
-            self.list_Bug.append(bug)
-        
+            self.list_Bug[key] = bug
+
 
 
     def update_model(self, bug, positives, negatives):

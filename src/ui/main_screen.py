@@ -97,15 +97,15 @@ class MainScreen(AppFrame):
             self.app.ui.draw_frame(self.app.ui.screen.Main)
             return
         
-        if key == "": #Se não informou Key
-            if len(info) <= 1:# Se não informou key e descript
+        if key == "": 
+            if len(info) <= 1:
                 messagebox.showwarning("No description or key", f"Please provide a description or a key")
                 self.app.ui.draw_frame(self.app.ui.screen.Main)
                 return
-            else: #se tem descrição
+            else: 
                 best, emb, percent = self.app.model.SBertSimilarity(text=info)
-                if percent > 0.95: #Se encontrou um Bug parecido
-                    ans = messagebox.askquestion("Confirm Bug", f"Your Bug {key} has {percent*100:.0f}% similar to \"{self.app.model.list_Bug[best].key} - {self.app.model.list_Bug[best].summary}\"\nIs it another Bug?")
+                if percent > 0.95: 
+                    ans = messagebox.askquestion("Confirm Bug", f"Your Bug has {percent*100:.0f}% similar to \"{self.app.model.list_Bug[best].key} - {self.app.model.list_Bug[best].summary}\"\nIs it another Bug?")
                     if ans == "yes":
                         if summary == "":
                             messagebox.showwarning("No key and summary", f"Please provide a key and summary")
@@ -115,7 +115,7 @@ class MainScreen(AppFrame):
                             messagebox.showwarning("No key", f"Please provide a key")
                             self.app.ui.draw_frame(self.app.ui.screen.Main)
                             return
-                    else: #Usa bug com 95%+ de similaridade
+                    else: 
                         bug = self.app.model.list_Bug[best]
                 else:
                     if summary == "":
@@ -126,12 +126,12 @@ class MainScreen(AppFrame):
                         messagebox.showwarning("No key", f"Please provide a key")
                         self.app.ui.draw_frame(self.app.ui.screen.Main)
                         return
-        else:#Se informou um key:
+        else:
             try:
                 bug = self.app.model.list_Bug[key]
             except:
-                if len(info) <= 1:# Se não informou descript
-                    if summary == "": #nem summary
+                if len(info) <= 1:
+                    if summary == "": 
                         messagebox.showwarning("Bug not found", f"Please provide a description and summary to insert the new bug")
                         self.app.ui.draw_frame(self.app.ui.screen.Main)
                         return
@@ -139,9 +139,9 @@ class MainScreen(AppFrame):
                         messagebox.showwarning("Bug not found", f"Please provide a description to insert the new bug")
                         self.app.ui.draw_frame(self.app.ui.screen.Main)
                         return
-                else: #se tem descrição
+                else:
                     best, emb, percent = self.app.model.SBertSimilarity(text=info)
-                    if percent > 0.95: #Se encontrou um Bug parecido
+                    if percent > 0.95: 
                         ans = messagebox.askquestion("Confirm Bug", f"Your Bug {key} is not found, but has {percent*100:.0f}% similar to \"{self.app.model.list_Bug[best].key} - {self.app.model.list_Bug[best].summary}\"\nIs it another Bug?")
                         if ans == "yes":
                             if summary == "":
@@ -149,10 +149,9 @@ class MainScreen(AppFrame):
                                 self.app.ui.draw_frame(self.app.ui.screen.Main)
                                 return
                             else:
-                                self.app.model.insert_Bug(encode_text = emb, id = best, comp=selected_component.id, team=selected_team.id, key=key, opt=percent)
-                                self.app.model.list_Bug[len(self.app.model.list_Bug)-1].summary = summary
-                                bug = self.app.model.list_Bug[len(self.app.model.list_Bug)-1]
-                        else: #Usa bug com 95%+ de similaridade
+                                self.app.model.insert_Bug(encode_text = emb, id = best, comp=selected_component, team=selected_team, key=key, opt=percent, title=summary)
+                                bug = self.app.model.list_Bug[key]
+                        else: 
                             bug = self.app.model.list_Bug[best]
                     else:
                         if summary == "":
@@ -160,9 +159,8 @@ class MainScreen(AppFrame):
                             self.app.ui.draw_frame(self.app.ui.screen.Main)
                             return
                         else:
-                            self.app.model.insert_Bug(encode_text = emb, id = best, comp=selected_component.id, team=selected_team.id, key=key, opt=percent)
-                            self.app.model.list_Bug[len(self.app.model.list_Bug)-1].summary = summary
-                            bug = self.app.model.list_Bug[len(self.app.model.list_Bug)-1]
+                            self.app.model.insert_Bug(encode_text = emb, id = best, comp=selected_component, team=selected_team, key=key, opt=percent, title=summary)
+                            bug = self.app.model.list_Bug[key]
 
 
         recomend = self.app.model.recommend(bug,[16,2,2])

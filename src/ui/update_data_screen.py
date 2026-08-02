@@ -21,28 +21,18 @@ class UpdateDataScreen(AppFrame):
         self.textarea_bug_label = tk.Label(self, text="Add Bugs from:")
         self.textarea_bug_label.grid(row=1, column=0, columnspan=2, sticky=tk.W)
         
-        #last_bug = 0
-        # for bug in self.app.model.list_Bug:
-        #     if int(bug.key.replace("SP7-","")) > last_bug:
-        #         last_bug = int(bug.key.replace("SP7-",""))
-
+     
         self.textarea_bug = tk.Text(self, width=40, height=1)
         self.textarea_bug.grid(row=1, column=3,columnspan=3)
         self.textarea_bug.delete(1.0, tk.END)
-        #self.textarea_bug.insert(tk.END, "SP7-"+str(last_bug))
 
-        #last_test = 0
-        # for test in self.app.model.list_Test:
-        #     if int(test.key.replace("SP7-","")) > last_test:
-        #         last_test = int(test.key.replace("SP7-",""))
-
+  
         self.textarea_test_label = tk.Label(self, text="Add Tests from:")
         self.textarea_test_label.grid(row=2, column=0, columnspan=2, sticky=tk.W)
 
         self.textarea_test = tk.Text(self, width=40, height=1)
         self.textarea_test.grid(row=2, column=3,columnspan=3)
         self.textarea_test.delete(1.0, tk.END)
-        #self.textarea_test.insert(tk.END, "SP7-"+str(last_test))
 
 
         self.textarea_server_label = tk.Label(self, text="Server:")
@@ -112,7 +102,6 @@ class UpdateDataScreen(AppFrame):
                     
                     self.app.model.insert_new_bug(bug['key'], bug['desc'], bug['summary'], str(teams).replace("[","").replace("]","").replace(",","#"), str(comps).replace("[","").replace("]","").replace(",","#"))
         except:
-            #tk.messagebox.showwarning("Error collecting Bugs", f"Trying to collect tests")
             bug_colect_error = 1
 
         try:
@@ -147,9 +136,9 @@ class UpdateDataScreen(AppFrame):
             
                     self.app.model.insert_new_test(test['key'], test['steps'], test['summary'], str(teams).replace("[","").replace("]","").replace(",","#"), str(comps).replace("[","").replace("]","").replace(",","#"))
         except:
-            #tk.messagebox.showwarning("Error collecting Tests", f"Try again")
+  
             test_colect_error = 1
-        #messagebox.showwarning("Data Update", f"{len(list_Test)} New Test(s) and {list_Bugs} new Bug(s) were added to the model")
+        
         
         if test_colect_error == 1:
             if bug_colect_error == 1:
